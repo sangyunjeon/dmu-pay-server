@@ -90,7 +90,8 @@ $_SESSION['user'] = [
 
 echo json_encode([
     'success' => true,
-    'message' => '로그인 성공'
+    'message' => '로그인 성공',
+    'role' => $role // 🔥 역할 정보 추가!
 ]);
 
 $conn->close();
