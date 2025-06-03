@@ -53,7 +53,7 @@ $result = $stmt->get_result();
 if ($result->num_rows !== 1) {
     echo json_encode([
         'success' => false,
-        'message' => '존재하지 않는 아이디입니다.'
+        'message' => '아이디/비밀번호가 틀렸습니다.'
     ]);
     $stmt->close();
     $conn->close();
@@ -69,12 +69,11 @@ $userId     = $row['id'];
 
 $stmt->close();
 
-// 7) 해시된 입력값과 DB 해시값 비교
-if ($hashedInput !== $storedHash) {
-    // 비밀번호 불일치
+// 7) 비밀번호 검증 (변경된 부분!)
+if (!password_verify($password, $storedHash)) {
     echo json_encode([
         'success' => false,
-        'message' => '비밀번호가 일치하지 않습니다.'
+        'message' => '아이디/비밀번호가 틀렸습니다.'
     ]);
     $conn->close();
     exit;
