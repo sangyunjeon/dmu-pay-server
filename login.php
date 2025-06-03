@@ -53,7 +53,7 @@ $result = $stmt->get_result();
 if ($result->num_rows !== 1) {
     echo json_encode([
         'success' => false,
-        'message' => '아이디/비밀번호가 틀렸습니다.'
+        'message' => '존재하지 않는 아이디입니다.'
     ]);
     $stmt->close();
     $conn->close();
@@ -73,7 +73,7 @@ $stmt->close();
 if (!password_verify($password, $storedHash)) {
     echo json_encode([
         'success' => false,
-        'message' => '아이디/비밀번호가 틀렸습니다.'
+        'message' => '비밀번호가 일치하지 않습니다.'
     ]);
     $conn->close();
     exit;
