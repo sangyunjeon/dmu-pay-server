@@ -1,19 +1,17 @@
 <?php
-
-
-// login.php 맨 위에 추가
-header('Access-Control-Allow-Origin: *');
+// CORS 설정 (Netlify 주소로 수정)
+header('Access-Control-Allow-Origin: https://dmu-pay.netlify.app'); // ✅ 정확한 주소
+header('Access-Control-Allow-Credentials: true'); // ✅ 세션을 위해 필수
 header('Access-Control-Allow-Headers: Content-Type');
-
-// login.php
 header('Content-Type: application/json; charset=UTF-8');
+
 session_start();
 
-// 1) DB 접속 정보(자신 환경에 맞게 수정)
+// 닷홈용 DB 접속 정보
 $dbHost = 'localhost';
-$dbUser = 'root';
-$dbPass = '';            // MySQL 비밀번호
-$dbName = 'dmu_pay';     // 실제 사용 중인 DB 이름
+$dbUser = 'dmupay01';
+$dbPass = 'tkddbs0130!';
+$dbName = 'dmupay01';
 
 $conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
 if ($conn->connect_error) {
@@ -24,7 +22,7 @@ if ($conn->connect_error) {
     exit;
 }
 
-// 2) POST로 전달된 username, password 받기
+// 사용자 입력 받기
 $username = isset($_POST['username']) ? trim($_POST['username']) : '';
 $password = isset($_POST['password']) ? $_POST['password'] : '';
 
@@ -36,20 +34,16 @@ if ($username === '' || $password === '') {
     exit;
 }
 
-// 3) 입력받은 비밀번호를 SHA-256 해시로 변환 (DB에 SHA2('qwer123',256) 방식으로 저장했으므로)
-$hashedInput = hash('sha256', $password);
-
-// 4) users 테이블에서 해당 username에 대한 정보 조회
+// users 테이블에서 사용자 조회
 $stmt = $conn->prepare("
     SELECT id, password, role, name
-      FROM users
-     WHERE username = ?
+    FROM users
+    WHERE username = ?
 ");
 $stmt->bind_param('s', $username);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// 5) 결과가 없으면 “존재하지 않는 아이디” 반환
 if ($result->num_rows !== 1) {
     echo json_encode([
         'success' => false,
@@ -60,7 +54,6 @@ if ($result->num_rows !== 1) {
     exit;
 }
 
-// 6) 해당 행에서 해시된 비밀번호, 역할, 이름 가져오기
 $row = $result->fetch_assoc();
 $storedHash = $row['password'];
 $role       = $row['role'];
@@ -69,7 +62,7 @@ $userId     = $row['id'];
 
 $stmt->close();
 
-// 7) 비밀번호 검증 (변경된 부분!)
+// 비밀번호 검증 (SHA-256이 아니라 password_hash를 사용하는 경우)
 if (!password_verify($password, $storedHash)) {
     echo json_encode([
         'success' => false,
@@ -79,7 +72,7 @@ if (!password_verify($password, $storedHash)) {
     exit;
 }
 
-// 8) 로그인 성공 → 세션에 사용자 정보 저장
+// 로그인 성공 → 세션 저장
 $_SESSION['user'] = [
     'id'       => $userId,
     'username' => $username,
@@ -87,10 +80,12 @@ $_SESSION['user'] = [
     'name'     => $name
 ];
 
+// 성공 응답 반환
 echo json_encode([
     'success' => true,
     'message' => '로그인 성공',
-    'role' => $role // 🔥 역할 정보 추가!
+    'role' => $role
 ]);
 
 $conn->close();
+?>
