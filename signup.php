@@ -5,8 +5,8 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // CORS & JSON 설정 (Netlify 주소로 정확히 설정!)
-header('Access-Control-Allow-Origin: https://dmu-pay.netlify.app'); // ✅ 중요!
-header('Access-Control-Allow-Credentials: true'); // ✅ 세션 사용 허용
+header('Access-Control-Allow-Origin: https://dmu-pay.netlify.app'); 
+header('Access-Control-Allow-Credentials: true'); //세션 사용 허용
 header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json; charset=UTF-8');
 
